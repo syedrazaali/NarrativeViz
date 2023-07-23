@@ -1,0 +1,10 @@
+#chart {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%; /* adjust this value to change the width of the chart */
+  }
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+  }
