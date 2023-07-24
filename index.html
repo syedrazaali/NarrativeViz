@@ -1,13 +1,28 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>NFL Players Statistics</title>
-        <script src="https://d3js.org/d3.v6.min.js"></script> <!-- include D3.js library -->
-        <link rel="stylesheet" type="text/css" href="styles.css"> <!-- link to your CSS file -->
-    </head>
-    <body>
-        <div id="chart1"></div> <!-- div for the first chart -->
-        <div id="chart2"></div> <!-- div for the second chart -->
-        <script src="script.js"></script> <!-- link to your JS file -->
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Player Data Narrative Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>NFL Player Data Narrative Visualization</h1>
+    <div class="tab">
+        <button class="tablinks" id="positionButton">Player Count by Position</button>
+        <button class="tablinks" id="ageButton">Average Age by Position</button>
+        <button class="tablinks" id="scatterPlotButton">Full Player Attribute Breakdown</button>
+    </div>
+    <br><br>
+    <div id="dropdown-container">
+        <label for="positionSelect">Select Position:</label>
+        <select id="positionSelect"></select>
+    </div>
+
+    <div id="chart"></div>
+    <p id="scene1Message"></p>
+
+    <script src="script.js"></script>
+</body>
 </html>
