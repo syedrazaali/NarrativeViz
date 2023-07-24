@@ -3,63 +3,111 @@ var margin = {top: 30, right: 30, bottom: 70, left: 80},
     width = 770 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 
-    function createScatterPlot(chartID, data, xAxisProp, yAxisProp, colorProp, chartTitle) {
-        // Append the SVG object to the chart div of the page,
-        // and set the dimensions of this SVG
-        var svg = d3.select(chartID)
-            .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    
-        // Add X axis
-        var x = d3.scaleLinear()
-        .domain([0, d3.max(data, function (d) { return +d[xAxisProp]; })])
-        .range([0, width]);
-        svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
-    
-        // Add Y axis
-        var y = d3.scaleLinear()
-        .domain([0, d3.max(data, function (d) { return +d[yAxisProp]; })])
-        .range([height, 0]);
-        svg.append("g")
-            .call(d3.axisLeft(y));
-    
-        // Color scale
-        var color = d3.scaleSequential()
-        .interpolator(d3.interpolateInferno)
-        .domain(d3.extent(data, function (d) { return +d[colorProp]; }))
-    
-        // Add dots
-        svg.append('g')
-            .selectAll("dot")
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("cx", function (d) { return x(d[xAxisProp]); })
-            .attr("cy", function (d) { return y(d[yAxisProp]); })
-            .attr("r", 5)
-            .style("fill", function (d) { return color(d[colorProp]) })
-    
-        // Add X axis label:
-        svg.append("text")
-            .attr("text-anchor", "end")
-            .attr("x", width/2)
-            .attr("y", height + margin.top + 20)
-            .text(xAxisProp);
-    
-        // Y axis label:
-        svg.append("text")
-            .attr("text-anchor", "end")
-            .attr("transform", "rotate(-90)")
-            .attr("y", -margin.left+20)
-            .attr("x", -margin.top)
-            .text(yAxisProp)
-    }
+    // var color = d3.scaleThreshold()
+    //  .domain([25, 30, 40])
+    //  .range(["#f94144", "#f3722c", "#f9c74f", "#90be6d", "#43aa8b", "#577590"]);
 
+    function createScatterPlot(chartID, data, xAxisProp, yAxisProp, colorProp, chartTitle) {
+    var svg = d3.select(chartID)
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .call(d3.zoom().on("zoom", function (event) {
+            svg.attr("transform", event.transform);
+        }))
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var x = d3.scaleLinear()
+        .domain([70, d3.max(data, function (d) { return +d[xAxisProp]; })])
+        .range([0, width]);
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    var y = d3.scaleLinear()
+        .domain([180, d3.max(data, function (d) { return +d[yAxisProp]; })])
+        .range([height, 0]);
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    var color = d3.scaleThreshold()
+        .domain([23, 25, 30, 35])
+        .range(["#f94144", "#f3722c", "#f9c74f", "#90be6d", "#43aa8b", "#577590"]);
+
+    var tooltip = d3.select("body")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px");
+
+    var mouseover = function(event, d) {
+        tooltip.style("opacity", 1);
+    };
+
+    var mousemove = function(event, d) {
+        tooltip
+            .html("Height: " + d[xAxisProp] + "<br>Weight: " + d[yAxisProp] + "<br>Age: " + d[colorProp])
+            .style("left", (event.clientX + 10) + "px")
+            .style("top", (event.clientY + 10) + "px");
+    };
+
+    var mouseleave = function(d) {
+        tooltip.style("opacity", 0);
+    };
+
+    svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return x(d[xAxisProp]); })
+        .attr("cy", function (d) { return y(d[yAxisProp]); })
+        .attr("r", 5)
+        .style("fill", function (d) { return color(d[colorProp]) })
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave);
+
+    svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", width/2)
+        .attr("y", height + margin.top + 20)
+        .text(xAxisProp);
+
+    svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -margin.left+20)
+        .attr("x", -margin.top)
+        .text(yAxisProp);
+
+    // Legend
+    var ageRanges = ["20-25", "25-30", "30-35", "35-40", "40+"];
+
+var legend = svg.selectAll(".legend")
+    .data(ageRanges)
+    .enter().append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+    legend.append("rect")
+    .attr("x", width - 18)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d, i) { return color(i * 5 + 22.5); }); 
+
+legend.append("text")
+    .attr("x", width - 24)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .text(function(d) { return d; });
+}
 // Function to filter data based on position
 function filterDataByPosition(data, position) {
     return data.filter(d => d.position === position);
@@ -218,6 +266,8 @@ var data;
 
 // Update the positionButton event listener
 positionButton.addEventListener('click', function() {
+    positionLabel.style.display = "none";
+    positionSelect.style.display = "none";
     d3.csv("players.csv").then(function(csvData) {
         // convert birthDate strings to Date objects
         csvData.forEach(d => d.birthDate = new Date(d.birthDate));
@@ -239,6 +289,8 @@ positionButton.addEventListener('click', function() {
 });
 
 ageButton.addEventListener('click', function() {
+    positionLabel.style.display = "none";
+    positionSelect.style.display = "none";
     d3.csv("players.csv").then(function(data) {
         // convert birthDate strings to Date objects
         data.forEach(d => d.birthDate = new Date(d.birthDate));
@@ -287,8 +339,12 @@ document.getElementById('positionSelect').addEventListener('change', function() 
 
 // Add button for scatter plot
 var scatterPlotButton = document.getElementById('scatterPlotButton');
+var positionSelect = document.getElementById('positionSelect');
+var positionLabel = document.getElementById('positionLabel');
 
 scatterPlotButton.addEventListener('click', function() {
+    positionLabel.style.display = "block";
+    positionSelect.style.display = "block";
     d3.csv("players.csv").then(function(data) {
         // convert birthDate strings to Date objects
         data.forEach(d => d.birthDate = new Date(d.birthDate));
