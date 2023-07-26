@@ -1,4 +1,3 @@
-// Set the dimensions and margins of the graph
 var margin = {top: 30, right: 30, bottom: 70, left: 80},
     width = 770 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
@@ -29,8 +28,8 @@ var margin = {top: 30, right: 30, bottom: 70, left: 80},
         .call(d3.axisLeft(y));
 
     var color = d3.scaleThreshold()
-        .domain([23, 25, 30, 35])
-        .range(["#f94144", "#f3722c", "#f9c74f", "#90be6d", "#43aa8b", "#577590"]);
+    .domain([23, 25, 30, 35])
+    .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]);
 
     var tooltip = d3.select("body")
         .append("div")
@@ -45,7 +44,6 @@ var margin = {top: 30, right: 30, bottom: 70, left: 80},
     var mouseover = function(event, d) {
         tooltip.style("opacity", 1);
     };
-
     var mousemove = function(event, d) {
         tooltip
             .html("Height: " + d[xAxisProp] + "<br>Weight: " + d[yAxisProp] + "<br>Age: " + d[colorProp])
@@ -56,7 +54,6 @@ var margin = {top: 30, right: 30, bottom: 70, left: 80},
     var mouseleave = function(d) {
         tooltip.style("opacity", 0);
     };
-
     svg.append('g')
         .selectAll("dot")
         .data(data)
@@ -84,7 +81,7 @@ var margin = {top: 30, right: 30, bottom: 70, left: 80},
         .text(yAxisProp);
 
 // Legend
-var ageRanges = ["20-25", "25-30", "30-35", "35-40", "40+"];
+var ageRanges = ["20-25", "25-30", "30-35", "35-40",];
 
 var legend = svg.selectAll(".legend")
     .data(ageRanges)
@@ -92,7 +89,7 @@ var legend = svg.selectAll(".legend")
     .attr("class", "legend")
     .attr("transform", function(d, i) { return "translate(0," + (height - i * 20 - 25) + ")"; }); // Adjust this for legend position
 
-legend.append("rect")
+    legend.append("rect")
     .attr("x", width - 18)
     .attr("width", 18)
     .attr("height", 18)
@@ -113,8 +110,6 @@ function filterDataByPosition(data, position) {
 
 // Function to create a bar chart given a CSV file and a property to visualize
 function createBarChart(chartID, data, property, chartTitle) {
-    // Append the SVG object to the chart div of the page,
-    // and set the dimensions of this SVG
     document.getElementById('chartTitle').innerText = chartTitle;
     var svg = d3.select(chartID)
         .append("svg")
@@ -168,15 +163,15 @@ svg.append("g")
     .text(property === 'position' ? "Number of Players" : "Average Age");
 
     // Bars
-    var bars = svg.selectAll(".mybar")
-        .data(dataArray)
-        .enter()
-        .append("rect")
-        .attr("x", function(d) { return x(d.property); })
-        .attr("y", function(d) { return y(d.value); })
-        .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d.value); })
-        .attr("fill", "#69b3a2");
+var bars = svg.selectAll(".mybar")
+    .data(dataArray)
+    .enter()
+    .append("rect")
+    .attr("x", function(d) { return x(d.property); })
+    .attr("y", function(d) { return y(d.value); })
+    .attr("width", x.bandwidth())
+    .attr("height", function(d) { return height - y(d.value); })
+    .attr("fill", "#013369");  // Dark blue similar to NFL logo
 
     // Tooltip
     var tooltip = d3.select("body")
@@ -211,7 +206,6 @@ svg.append("g")
         .on("mousemove", mousemove)
         .on("mouseleave", mouseleave);
 }
-
 // Function to calculate stats from data array
 function calculateStats(data, property) {
     let groupData;
@@ -227,7 +221,6 @@ function calculateStats(data, property) {
         groupData = d3.rollup(data, v => Number((d3.mean(v, d => d.age)).toFixed(2)), d => d.position);
     }
 
-    // create an array from the map
     var dataArray = Array.from(groupData, d => ({property: d[0], value: d[1]}));
 
     dataArray.forEach(item => {
@@ -251,7 +244,6 @@ function calculateStats(data, property) {
     };
 }
 
-// Buttons to switch between views
 var positionButton = document.getElementById('positionButton');
 var ageButton = document.getElementById('ageButton');
 var scatterButton = document.getElementById('scatterButton');  
@@ -260,25 +252,17 @@ var scatterButton = document.getElementById('scatterButton');
 function clearChart() {
     d3.select("#chart").html("");
 }
-
 var data;
 
-// Update the positionButton event listener
 positionButton.addEventListener('click', function() {
     positionLabel.style.display = "none";
     positionSelect.style.display = "none";
     d3.csv("players.csv").then(function(csvData) {
-        // convert birthDate strings to Date objects
         csvData.forEach(d => d.birthDate = new Date(d.birthDate));
-
-        // calculate the current year
         let currentYear = new Date().getFullYear();
-
-        // calculate ages and add as new property 'age'
         csvData.forEach(d => d.age = currentYear - d.birthDate.getFullYear());
 
         data = csvData; // set global data variable
-
         let stats = calculateStats(data, 'position');
         document.getElementById('scene1Message').innerText = `Our visualization journey begins with an overview of the total number of NFL players, clocking in at an impressive ${stats.total}. The Player Count by Position bar chart provides us with a bird's eye view of the league, highlighting the distribution of players across the various roles. The chart instantly captures our attention towards the position brimming with the highest count of players - ${stats.mostProperty}, boasting a whopping ${stats.highestValue} players. This might not come as a surprise considering the pivotal role this position plays in the dynamics of the game. However, the position that lays claim to the fewest players is ${stats.leastProperty}, fielding merely ${stats.lowestValue} players. This disparity in the count of players might hint at the relative complexity or niche requirements of this role, but can also be broken down into a subset of the runningback position.`;
 
@@ -291,13 +275,8 @@ ageButton.addEventListener('click', function() {
     positionLabel.style.display = "none";
     positionSelect.style.display = "none";
     d3.csv("players.csv").then(function(data) {
-        // convert birthDate strings to Date objects
         data.forEach(d => d.birthDate = new Date(d.birthDate));
-
-        // calculate the current year
         let currentYear = new Date().getFullYear();
-
-        // calculate ages and add as new property 'age'
         data.forEach(d => d.age = currentYear - d.birthDate.getFullYear());
 
         let stats = calculateStats(data, 'averageAge');
@@ -310,7 +289,6 @@ ageButton.addEventListener('click', function() {
 
 // Function to populate select dropdown with positions
 function populatePositions(data) {
-    // Get unique positions
     let positions = [...new Set(data.map(item => item.position))];
 
     let select = document.getElementById('positionSelect'); 
@@ -325,13 +303,8 @@ function populatePositions(data) {
 }
 
 document.getElementById('positionSelect').addEventListener('change', function() {
-    // get the selected position
     let selectedPosition = this.value;
-
-    // filter the data by selected position
     let filteredData = filterDataByPosition(data, selectedPosition);
-
-    // call the scatter plot function with the required arguments
     clearChart();
     createScatterPlot("#chart", filteredData, "height", "weight", "age", "Player Height vs Weight colored by Age");
 });
@@ -345,50 +318,32 @@ scatterPlotButton.addEventListener('click', function() {
     positionLabel.style.display = "block";
     positionSelect.style.display = "block";
     d3.csv("players.csv").then(function(data) {
-        // convert birthDate strings to Date objects
         data.forEach(d => d.birthDate = new Date(d.birthDate));
 
         populatePositions(data);
-
-        // calculate the current year
         let currentYear = new Date().getFullYear();
-
-        // calculate ages and add as new property 'age'
         data.forEach(d => d.age = currentYear - d.birthDate.getFullYear());
-
-        // get the selected position
         let selectedPosition = document.getElementById('positionSelect').value;
-
-        // filter the data by selected position
         let filteredData = filterDataByPosition(data, selectedPosition);
-
-        // call the scatter plot function with the required arguments
         document.getElementById('scene1Message').innerText = "The scatterplot represents a comprehensive breakdown of player attributes in terms of height and weight, color-coded by age. This graphical representation offers insights into the typical physical profiles across different positions in the NFL, with each dot representing an individual player and includes the functionality to be able to zoom in and out of the graph to get a closer look at each position. By color-coding the data points by age, the plot provides an additional layer of information, offering a glimpse into how age distributions can vary across positions. This visualization is particularly useful for identifying patterns and correlations between the physical attributes and age of players. The drop-down menu allows for data filtering, enabling viewers to focus on specific positions for more detailed analysis. As seen in the plot, each position is vastly different: age, height, and weight demographics all vary widely from the more Athletic positions in comparison to the blocking and rushing positions. WR, RB, CB cover the most athletic positions in the NFL which is why we see a younger age, taller height, and moderate weight for these positions. This dataset clearly breaks down the mold of NFL player by position.   ";
         clearChart();
         createScatterPlot("#chart", filteredData, "height", "weight", "age", "Player Height vs Weight colored by Age");
     });
 });
 
-// get reference to all buttons with class 'tablinks'
 let tabButtons = document.querySelectorAll('.tablinks');
 
-// add event listener to each button
 tabButtons.forEach(button => {
     button.addEventListener('click', () => {
         setActiveTab(button);
     });
 });
-
-// function to set active tab
 function setActiveTab(activeButton) {
-    // remove active class from all buttons
     tabButtons.forEach(button => {
         button.classList.remove('active');
     });
-    // add active class to the active button
     activeButton.classList.add('active');
 }
-
 var hasVisitedPosition = false;
 var hasVisitedAge = false;
 
@@ -396,19 +351,15 @@ document.getElementById('positionButton').addEventListener('click', function() {
   hasVisitedPosition = true;
   checkAccessToFullBreakdown();
 });
-
 document.getElementById('ageButton').addEventListener('click', function() {
   hasVisitedAge = true;
   checkAccessToFullBreakdown();
 });
-
 function checkAccessToFullBreakdown() {
   if (hasVisitedPosition && hasVisitedAge) {
     document.getElementById('scatterPlotButton').disabled = false;
   }
 }
-
-// Initially disable the full breakdown tab
 document.getElementById('scatterPlotButton').disabled = true;
 
 positionButton.click()
