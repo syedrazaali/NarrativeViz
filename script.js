@@ -4,32 +4,38 @@ var margin = {top: 30, right: 30, bottom: 70, left: 80},
 
     function createScatterPlot(chartID, data, xAxisProp, yAxisProp, colorProp, chartTitle) {
         document.getElementById('chartTitle').innerText = "Player Attribute Breakdown";
-    var svg = d3.select(chartID)
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .call(d3.zoom().on("zoom", function (event) {
-            svg.attr("transform", event.transform);
-        }))
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    var x = d3.scaleLinear()
-        .domain([70, d3.max(data, function (d) { return +d[xAxisProp]; })])
-        .range([0, width]);
-    svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
-
-    var y = d3.scaleLinear()
-        .domain([180, d3.max(data, function (d) { return +d[yAxisProp]; })])
-        .range([height, 0]);
-    svg.append("g")
-        .call(d3.axisLeft(y));
-
-    var color = d3.scaleThreshold()
-    .domain([23, 25, 30, 35])
-    .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]);
+        var svg = d3.select(chartID)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .call(d3.zoom().on("zoom", function (event) {
+                svg.attr("transform", event.transform);
+            }))
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+        // Calculate the minimum and maximum for x and y
+        var xMin = d3.min(data, function (d) { return +d[xAxisProp]; });
+        var xMax = d3.max(data, function (d) { return +d[xAxisProp]; });
+        var yMin = d3.min(data, function (d) { return +d[yAxisProp]; });
+        var yMax = d3.max(data, function (d) { return +d[yAxisProp]; });
+    
+        var x = d3.scaleLinear()
+            .domain([xMin, xMax])
+            .range([0, width]);
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+    
+        var y = d3.scaleLinear()
+            .domain([yMin, yMax])
+            .range([height, 0]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+    
+        var color = d3.scaleThreshold()
+            .domain([23, 25, 30, 35])
+            .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]);
 
     var tooltip = d3.select("body")
         .append("div")
@@ -264,7 +270,7 @@ positionButton.addEventListener('click', function() {
 
         data = csvData; // set global data variable
         let stats = calculateStats(data, 'position');
-        document.getElementById('scene1Message').innerText = `Our visualization journey begins with an overview of the total number of NFL players, clocking in at an impressive ${stats.total}. The Player Count by Position bar chart provides us with a bird's eye view of the league, highlighting the distribution of players across the various roles. The chart instantly captures our attention towards the position brimming with the highest count of players - ${stats.mostProperty}, boasting a whopping ${stats.highestValue} players. This might not come as a surprise considering the pivotal role this position plays in the dynamics of the game. However, the position that lays claim to the fewest players is ${stats.leastProperty}, fielding merely ${stats.lowestValue} players. This disparity in the count of players might hint at the relative complexity or niche requirements of this role, but can also be broken down into a subset of the runningback position.`;
+        document.getElementById('scene1Message').innerText = `Our visualization journey begins with an overview of the total number of NFL players, clocking in at an impressive ${stats.total}. The Player Count by Position bar chart provides us with a bird's eye view of the league, highlighting the distribution of players across the various roles. The chart instantly captures our attention towards the position brimming with the highest count of players - ${stats.mostProperty}, boasting a whopping ${stats.highestValue} players. This might not come as a surprise considering the pivotal role this position plays in the dynamics of the game. However, the position that lays claim to the fewest players is ${stats.leastProperty}, fielding merely ${stats.lowestValue} players. This disparity in the count of players might hint at the relative complexity or niche requirements of this role, but can also be broken down into a subset of the runningback position. We will begin to look further into all the factors that directly have an impact on the performance trends of NFL players across various positions and other factors (to be seen ahead).`;
 
         clearChart();
         createBarChart("#chart", data, "position", "Player Count by Position");
@@ -280,7 +286,7 @@ ageButton.addEventListener('click', function() {
         data.forEach(d => d.age = currentYear - d.birthDate.getFullYear());
 
         let stats = calculateStats(data, 'averageAge');
-        document.getElementById('scene1Message').innerText = `The Average Age by Position bar chart paints a fascinating picture of the relationship between the player's age and their position within the NFL. This age distribution is not merely numbers; it offers valuable insights into the athletic profile required for each position and the physical demands they entail. With a quick glance at the chart, it's possible to identify which positions are considered the most challenging or taxing to play. For instance, the position with the oldest average age, ${stats.mostProperty}, with an average age of ${stats.highestValue}, suggests that experience and tactical acumen often outshine sheer athleticism. On the other hand, the position with the youngest average age, ${stats.leastProperty}, at a tender ${stats.lowestValue}, is frequently viewed as the most physically challenging and taxing to be played. This dichotomy underscores the complexity and diversity of skills and physical prowess required across different positions in the NFL. Not only does the chart represent the demographic landscape of the league, but it also prompts us to appreciate the nuances and intricacies that make the sport so engaging and unpredictable.`;
+        document.getElementById('scene1Message').innerText = `The Average Age by Position bar chart paints a fascinating picture of the relationship between the player's age and their position within the NFL. This age distribution is not merely numbers; it offers valuable insights into the athletic profile required for each position and the physical demands they entail. With a quick glance at the chart, it's possible to identify which positions are considered the most challenging or taxing to play. For instance, the position with the oldest average age, ${stats.mostProperty}, with an average age of ${stats.highestValue}, suggests that experience and tactical acumen often outshine sheer athleticism. On the other hand, the position with the youngest average age, ${stats.leastProperty}, at a tender ${stats.lowestValue}, is frequently viewed as the most physically challenging and taxing to be played (which is why the NFL is consider a young man's sport). This dichotomy underscores the complexity and diversity of skills and physical prowess required across different positions in the NFL. Not only does the chart represent the demographic landscape of the league, but it also prompts us to appreciate the nuances and intricacies that make the sport so engaging and unpredictable. This like the last bar graph is interactable with tooltips, giving exact specifics for each position's average age.`;
 
         clearChart();
         createBarChart("#chart", data, "averageAge", "Average Age of Players by Position");
